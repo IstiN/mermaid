@@ -34,6 +34,20 @@ export interface HeadlessRenderResult extends HeadlessMermaidRenderResult {
   id: string;
 }
 
+export interface HeadlessDomWindow {
+  document: Document;
+  navigator?: Navigator;
+  Element?: typeof Element;
+  HTMLElement?: typeof HTMLElement;
+  SVGElement?: typeof SVGElement;
+  close?: () => void;
+}
+
+export interface HeadlessEnvironment {
+  window: HeadlessDomWindow;
+  cleanup?: () => void;
+}
+
 interface MermaidRuntime {
   initialize: (config: HeadlessMermaidConfig) => void;
   render: (id: string, definition: string) => Promise<HeadlessMermaidRenderResult>;
@@ -57,7 +71,7 @@ function estimateTextWidth(element: Element, textWidthFactor: number): number {
   return Math.max(10, text.length * textWidthFactor);
 }
 
-function installSvgTextMetrics(window: DOMWindow, options: Required<Pick<HeadlessRenderOptions, 'textWidthFactor' | 'lineHeight'>>) {
+function installSvgTextMetrics(window: HeadlessDomWindow, options: Required<Pick<HeadlessRenderOptions, 'textWidthFactor' | 'lineHeight'>>) {
   const svgPrototype = window.SVGElement?.prototype as (SVGElement & {
     getBBox?: () => DOMRect;
     getComputedTextLength?: () => number;
@@ -89,7 +103,7 @@ function installSvgTextMetrics(window: DOMWindow, options: Required<Pick<Headles
   };
 }
 
-function installDomGlobals(window: DOMWindow): () => void {
+function installDomGlobals(window: HeadlessDomWindow): () => void {
   const globalObject = globalThis as GlobalWithDom;
   const previous = {
     window: Object.getOwnPropertyDescriptor(globalObject, 'window'),
@@ -135,7 +149,7 @@ function installDomGlobals(window: DOMWindow): () => void {
   };
 }
 
-function createHeadlessWindow(options: HeadlessRenderOptions): DOMWindow {
+function createJsdomEnvironment(options: HeadlessRenderOptions): HeadlessEnvironment {
   const dom = new JSDOM('<!doctype html><html><body></body></html>', {
     pretendToBeVisual: true,
   });
@@ -145,7 +159,12 @@ function createHeadlessWindow(options: HeadlessRenderOptions): DOMWindow {
     lineHeight: options.lineHeight ?? DEFAULT_LINE_HEIGHT,
   });
 
-  return dom.window;
+  return {
+    window: dom.window,
+    cleanup() {
+      dom.window.close();
+    },
+  };
 }
 
 /**
@@ -159,12 +178,34 @@ export async function renderToSvg(
   definition: string,
   options: HeadlessRenderOptions = {}
 ): Promise<HeadlessRenderResult> {
+  return renderToSvgWithEnvironment(definition, createJsdomEnvironment(options), options);
+}
+
+/**
+ * Render Mermaid text to SVG with a caller-provided DOM/SVG environment.
+ *
+ * This is the production integration point for non-browser runtimes such as GraalJS:
+ * dmtools can provide a Java-backed `window`/`document` implementation while this
+ * package keeps Mermaid's browser entrypoint untouched.
+ */
+export async function renderToSvgWithEnvironment(
+  definition: string,
+  environment: HeadlessEnvironment,
+  options: HeadlessRenderOptions = {}
+): Promise<HeadlessRenderResult> {
   if (!definition || !definition.trim()) {
     throw new Error('Mermaid definition is required');
   }
+  if (!environment?.window?.document) {
+    throw new Error('A headless window with document is required');
+  }
 
   const id = options.id ?? 'mermaid-headless';
-  const window = createHeadlessWindow(options);
+  const window = environment.window;
+  installSvgTextMetrics(window, {
+    textWidthFactor: options.textWidthFactor ?? DEFAULT_TEXT_WIDTH_FACTOR,
+    lineHeight: options.lineHeight ?? DEFAULT_LINE_HEIGHT,
+  });
   const restoreGlobals = installDomGlobals(window);
 
   try {
@@ -184,10 +225,11 @@ export async function renderToSvg(
     };
   } finally {
     restoreGlobals();
-    window.close();
+    environment.cleanup?.();
   }
 }
 
 export default {
   renderToSvg,
+  renderToSvgWithEnvironment,
 };
