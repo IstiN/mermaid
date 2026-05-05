@@ -1,0 +1,39 @@
+{
+  "name": "@mermaid-js/mermaid-headless",
+  "version": "0.0.0",
+  "description": "Headless Mermaid rendering helpers for server-side and embedded JavaScript runtimes.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "mermaid",
+    "headless",
+    "svg",
+    "renderer"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "jsdom": "^26.1.0",
+    "mermaid": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^21.1.7",
+    "typescript": "~5.7.3",
+    "vitest": "^3.2.4"
+  },
+  "files": [
+    "dist/"
+  ]
+}

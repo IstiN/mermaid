@@ -436,6 +436,25 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1
 
+  packages/mermaid-headless:
+    dependencies:
+      jsdom:
+        specifier: ^26.1.0
+        version: 26.1.0(canvas@3.2.0)
+      mermaid:
+        specifier: workspace:^
+        version: link:../mermaid
+    devDependencies:
+      '@types/jsdom':
+        specifier: ^21.1.7
+        version: 21.1.7
+      typescript:
+        specifier: ~5.7.3
+        version: 5.7.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.19.1)(@vitest/ui@3.2.4)(jiti@2.6.1)(jsdom@26.1.0(canvas@3.2.0))(terser@5.46.1)(tsx@4.20.6)(yaml@2.8.1)
+
   packages/mermaid-layout-elk:
     dependencies:
       d3:
@@ -3433,9 +3452,6 @@ packages:
 
   '@types/node@18.19.124':
     resolution: {integrity: sha512-hY4YWZFLs3ku6D2Gqo3RchTd9VRCcrjqp/I0mmohYeUVA5Y8eCXKJEasHxLAJVZRJuQogfd1GiJ9lgogBgKeuQ==}
-
-  '@types/node@22.18.3':
-    resolution: {integrity: sha512-gTVM8js2twdtqM+AE2PdGEe9zGQY4UvmFjan9rZcVb6FGdStfjWoWejdmy4CfWVO9rh5MiYQGZloKAGkJt8lMw==}
 
   '@types/node@22.19.1':
     resolution: {integrity: sha512-LCCV0HdSZZZb34qifBsyWlUmok6W7ouER+oQIGBScS8EsZsQbrtFTUrDX4hOl+CS6p7cnNC4td+qrSVGSCTUfQ==}
@@ -12096,7 +12112,7 @@ snapshots:
       '@babel/preset-env': 7.29.2(@babel/core@7.29.0)
       babel-loader: 10.0.0(@babel/core@7.29.0)(webpack@5.101.3(esbuild@0.25.12))
       bluebird: 3.7.1
-      debug: 4.4.0
+      debug: 4.4.3(supports-color@8.1.1)
       lodash: 4.18.1
       semver: 7.7.3
       webpack: 5.101.3(esbuild@0.25.12)
@@ -13534,7 +13550,7 @@ snapshots:
 
   '@types/jsdom@21.1.7':
     dependencies:
-      '@types/node': 22.18.3
+      '@types/node': 22.19.1
       '@types/tough-cookie': 4.0.5
       parse5: 7.3.0
 
@@ -13591,10 +13607,6 @@ snapshots:
   '@types/node@18.19.124':
     dependencies:
       undici-types: 5.26.5
-
-  '@types/node@22.18.3':
-    dependencies:
-      undici-types: 6.21.0
 
   '@types/node@22.19.1':
     dependencies:
@@ -21406,9 +21418,9 @@ snapshots:
       chai: 5.3.3
       debug: 4.4.3(supports-color@8.1.1)
       expect-type: 1.2.2
-      magic-string: 0.30.19
+      magic-string: 0.30.21
       pathe: 2.0.3
-      picomatch: 4.0.3
+      picomatch: 4.0.4
       std-env: 3.9.0
       tinybench: 2.9.0
       tinyexec: 0.3.2
